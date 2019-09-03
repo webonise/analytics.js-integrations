@@ -11,7 +11,8 @@ describe('HubSpot', function() {
   var hubspot;
   var options = {
     portalId: 62515,
-    loadFormsSdk: false
+    loadFormsSdk: false,
+    loadChatWidget: false
   };
 
   beforeEach(function() {
@@ -37,6 +38,7 @@ describe('HubSpot', function() {
         .global('_hsq')
         .global('hbspt')
         .option('loadFormsSdk', false)
+        .option('loadChatWidget', false)
         .option('portalId', null)
     );
   });
@@ -52,6 +54,13 @@ describe('HubSpot', function() {
         analytics.initialize();
         analytics.page();
         analytics.assert(window._hsq instanceof Array);
+      });
+
+      it('should check for loadChatWidget to open chat widget', function() {
+        analytics.stub(window.HubSpotConversations.widget, 'load');
+        if (this.options.loadChatWidget) {
+          analytics.called(window.HubSpotConversations.widget, 'load');
+        }
       });
     });
   });
