@@ -20,6 +20,7 @@ var HubSpot = (module.exports = integration('HubSpot')
   .global('hbspt')
   .option('portalId', null)
   .option('loadFormsSdk', false)
+  .option('loadChatWidget', false)
   .tag(
     'lib',
     '<script id="hs-analytics" src="https://js.hs-analytics.net/analytics/{{ cacheBuster }}/{{ portalId }}.js">'
@@ -36,6 +37,7 @@ HubSpot.prototype.initialize = function() {
   window._hsq = window._hsq || [];
   var cacheBuster = Math.ceil(new Date() / 300000) * 300000;
   var shouldLoadLeadForms = this.options.loadFormsSdk;
+  var loadChatWidget = this.options.loadChatWidget;
   var self = this;
   if (shouldLoadLeadForms) {
     this.load('forms', function() {
@@ -43,6 +45,9 @@ HubSpot.prototype.initialize = function() {
     });
   } else {
     this.load('lib', { cacheBuster: cacheBuster }, this.ready);
+  }
+  if (loadChatWidget) {
+    window.HubSpotConversations.widget.load();
   }
 };
 
