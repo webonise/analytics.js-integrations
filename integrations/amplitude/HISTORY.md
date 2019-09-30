@@ -1,3 +1,7 @@
+# 3.0.1 / 2019-09-30
+
+- Added support for custom revenue type.
+
 # 3.0.0 / 2019-06-10
 
 - Update Amplitude SDK to v5.2.2
