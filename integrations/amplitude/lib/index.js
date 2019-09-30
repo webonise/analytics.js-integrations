@@ -242,7 +242,11 @@ function logEvent(track, dontSetRevenue) {
     each(function(value, key) {
       // add query params to either `user_properties` or `event_properties`
       type = value;
-      type === 'user_properties' ? (params[key] = query) : (props[key] = query);
+      if (type === 'user_properties') {
+        params[key] = query;
+      } else {
+        props[key] = query;
+      }
     }, mapQueryParams);
 
     if (type === 'user_properties')
@@ -411,9 +415,9 @@ Amplitude.prototype.sendReferrer = function() {
 
   var parts = referrer.split('/');
   if (parts.length >= 3) {
-    var referring_domain = parts[2];
-    identify.setOnce('initial_referring_domain', referring_domain);
-    identify.set('referring_domain', referring_domain);
+    var referringDomain = parts[2];
+    identify.setOnce('initial_referring_domain', referringDomain);
+    identify.set('referring_domain', referringDomain);
   }
 
   window.amplitude.getInstance().identify(identify);
