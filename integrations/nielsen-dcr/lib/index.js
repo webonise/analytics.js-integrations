@@ -7,6 +7,7 @@
 var integration = require('@segment/analytics.js-integration');
 var find = require('obj-case').find;
 var reject = require('reject');
+var dateformat = require('dateformat');
 
 /**
  * Expose `NielsenDCR` integration.
@@ -16,6 +17,12 @@ var NielsenDCR = (module.exports = integration('Nielsen DCR')
   .option('appId', '')
   .option('instanceName', '') // the snippet lets you override the instance so make sure you don't have any global window props w same value as this setting unless you are intentionally doing that.
   .option('nolDevDebug', false)
+  .option('assetIdPropertyName', '') // deprecated
+  .option('contentAssetIdPropertyName', '')
+  .option('adAssetIdPropertyName', '')
+  .option('subbrandPropertyName', '')
+  .option('clientIdPropertyName', '')
+  .option('contentLengthPropertyName', 'total_length')
   .option('optout', false)
   .tag(
     'http',
@@ -110,10 +117,13 @@ NielsenDCR.prototype.page = function(page) {
 
 NielsenDCR.prototype.heartbeat = function(assetId, position, options) {
   var self = this;
-  var newPosition;
+  var newPosition = position;
   var opts = options || {};
+  // if position is not sent as a string
   try {
-    if (typeof position !== 'number') newPosition = parseInt(position, 10); // in case it is sent as a string
+    if (typeof position !== 'number') {
+      newPosition = parseInt(position, 10);
+    } // in case it is sent as a string
   } catch (e) {
     // if we can't parse position into an Int for some reason, early return
     // to prevent internal errors every second
@@ -155,27 +165,54 @@ NielsenDCR.prototype.heartbeat = function(assetId, position, options) {
 
 NielsenDCR.prototype.getContentMetadata = function(track, type) {
   var properties = 'properties.';
-  if (type && type === 'preroll') properties = 'properties.content.';
+  var assetIdProp = 'asset_id';
+  if (type) {
+    if (type === 'preroll') properties = 'properties.content.';
+    if (type === 'video') assetIdProp = 'content_asset_id';
+  }
 
   var integrationOpts = track.options(this.name);
   var contentMetadata = {
     type: 'content',
-    assetid: track.proxy(properties + 'asset_id'),
+    assetid: this.options.contentAssetIdPropertyName
+      ? track.proxy(properties + this.options.contentAssetIdPropertyName)
+      : track.proxy(properties + assetIdProp),
     program: track.proxy(properties + 'program'),
     title: track.proxy(properties + 'title'),
-    // hardcode 86400 if livestream ¯\_(ツ)_/¯
-    length: track.proxy(properties + 'livestream')
-      ? 86400
-      : track.proxy(properties + 'total_length'),
     isfullepisode: track.proxy(properties + 'full_episode') ? 'y' : 'n',
     mediaURL: track.proxy('context.page.url'),
-    airdate: track.proxy(properties + 'airdate'),
+    airdate: formatAirdate(track.proxy(properties + 'airdate')),
+    // `adLoadType` may be set in int opts, falling back to `load_type` property per our video spec
+    adloadtype: formatLoadType(
+      integrationOpts,
+      track.proxy(properties + 'load_type')
+    ),
     // below metadata fields must all be set in event's integrations opts object
-    adloadtype: find(integrationOpts, 'ad_load_type') === 'linear' ? '1' : '2', // or dynamic. linear means original ads that were broadcasted with tv airing. much less common use case
     crossId1: find(integrationOpts, 'crossId1'),
     crossId2: find(integrationOpts, 'crossId2'),
     hasAds: find(integrationOpts, 'hasAds') === true ? '1' : '0'
   };
+
+  if (track.proxy(properties + 'livestream')) {
+    // hardcode 86400 if livestream ¯\_(ツ)_/¯
+    contentMetadata.length = 86400;
+  } else if (this.options.contentLengthPropertyName !== 'total_length') {
+    var contentLengthKey = this.options.contentLengthPropertyName;
+    contentMetadata.length = track.proxy(properties + contentLengthKey);
+  } else {
+    contentMetadata.length = track.proxy(properties + 'total_length');
+  }
+
+  if (this.options.subbrandPropertyName) {
+    var subbrandProp = this.options.subbrandPropertyName;
+    contentMetadata.subbrand = track.proxy(properties + subbrandProp);
+  }
+
+  if (this.options.clientIdPropertyName) {
+    var clientIdProp = this.options.clientIdPropertyName;
+    contentMetadata.clientid = track.proxy(properties + clientIdProp);
+  }
+
   // optional: used for grouping data into different buckets
   var segB = find(integrationOpts, 'segB');
   var segC = find(integrationOpts, 'segC');
@@ -193,13 +230,15 @@ NielsenDCR.prototype.getContentMetadata = function(track, type) {
 
 NielsenDCR.prototype.getAdMetadata = function(track) {
   var type = track.proxy('properties.type');
-  var adMetadata;
-
   if (typeof type === 'string') type = type.replace('-', '');
-  adMetadata = {
-    assetid: track.proxy('ad_asset_id') || track.proxy('asset_id'),
+
+  var adMetadata = {
+    assetid: this.options.adAssetIdPropertyName
+      ? track.proxy('properties.' + this.options.adAssetIdPropertyName)
+      : track.proxy('properties.ad_asset_id'),
     type: type
   };
+
   return adMetadata;
 };
 
@@ -237,7 +276,9 @@ NielsenDCR.prototype.videoContentStarted = function(track) {
 NielsenDCR.prototype.videoContentPlaying = function(track) {
   clearInterval(this.heartbeatId);
 
-  var assetId = track.proxy('properties.asset_id');
+  var assetId = this.options.contentAssetIdPropertyName
+    ? track.proxy('properties.' + this.options.contentAssetIdPropertyName)
+    : track.proxy('properties.asset_id');
   var position = track.proxy('properties.position');
   var livestream = track.proxy('properties.livestream');
 
@@ -277,7 +318,9 @@ NielsenDCR.prototype.videoContentCompleted = function(track) {
 NielsenDCR.prototype.videoAdStarted = function(track) {
   clearInterval(this.heartbeatId);
 
-  var adAssetId = track.proxy('properties.asset_id');
+  var adAssetId = this.options.adAssetIdPropertyName
+    ? track.proxy('properties.' + this.options.adAssetIdPropertyName)
+    : track.proxy('properties.asset_id');
   var position = track.proxy('properties.position');
   var type = track.proxy('properties.type');
   if (typeof type === 'string') type = type.replace('-', '');
@@ -305,7 +348,9 @@ NielsenDCR.prototype.videoAdStarted = function(track) {
 NielsenDCR.prototype.videoAdPlaying = function(track) {
   clearInterval(this.heartbeatId);
 
-  var assetId = track.proxy('properties.asset_id');
+  var assetId = this.options.adAssetIdPropertyName
+    ? track.proxy('properties.' + this.options.adAssetIdPropertyName)
+    : track.proxy('properties.asset_id');
   var position = track.proxy('properties.position');
   this.heartbeat(assetId, position, { type: 'ad' });
 };
@@ -335,7 +380,9 @@ NielsenDCR.prototype.videoPlaybackInterrupted = function(track) {
 
   // if properly implemented, the point in which the playback is resumed
   // you should _only_ be sending the asset_id of whatever you are pausing in: content or ad
-  var adAssetId = track.proxy('properties.ad_asset_id');
+  var adAssetId = this.options.adAssetIdPropertyName
+    ? track.proxy('properties.' + this.options.adAssetIdPropertyName)
+    : track.proxy('properties.ad_asset_id');
   // if playback was interrupted during an ad, we only call `stop`
   // if interrupted during content play, we call both `end` and `stop`
   var position = track.proxy('properties.position');
@@ -354,8 +401,12 @@ NielsenDCR.prototype.videoPlaybackInterrupted = function(track) {
 NielsenDCR.prototype.videoPlaybackSeekCompleted = function(track) {
   clearInterval(this.heartbeatId);
 
-  var contentAssetId = track.proxy('properties.content_asset_id');
-  var adAssetId = track.proxy('properties.ad_asset_id');
+  var contentAssetId = this.options.contentAssetIdPropertyName
+    ? track.proxy('properties.' + this.options.contentAssetIdPropertyName)
+    : track.proxy('properties.content_asset_id');
+  var adAssetId = this.options.adAssetIdPropertyName
+    ? track.proxy('properties.' + this.options.adAssetIdPropertyName)
+    : track.proxy('properties.ad_asset_id');
   var position = track.proxy('properties.position');
   var livestream = track.proxy('properties.livestream');
   // if properly implemented, the point in which the playback is resumed
@@ -367,7 +418,10 @@ NielsenDCR.prototype.videoPlaybackSeekCompleted = function(track) {
     if (type === 'ad') {
       this._client.ggPM('loadMetadata', this.getAdMetadata(track));
     } else if (type === 'content') {
-      this._client.ggPM('loadMetadata', this.getContentMetadata(track));
+      this._client.ggPM(
+        'loadMetadata',
+        this.getContentMetadata(track, 'video')
+      );
     }
   }
 
@@ -399,8 +453,12 @@ NielsenDCR.prototype.videoPlaybackPaused = function(track) {
 NielsenDCR.prototype.videoPlaybackResumed = function(track) {
   clearInterval(this.heartbeatId);
 
-  var contentAssetId = track.proxy('properties.content_asset_id');
-  var adAssetId = track.proxy('properties.ad_asset_id');
+  var contentAssetId = this.options.contentAssetIdPropertyName
+    ? track.proxy('properties.' + this.options.contentAssetIdPropertyName)
+    : track.proxy('properties.content_asset_id');
+  var adAssetId = this.options.adAssetIdPropertyName
+    ? track.proxy('properties.' + this.options.adAssetIdPropertyName)
+    : track.proxy('properties.ad_asset_id');
   var position = track.proxy('properties.position');
   // if properly implemented, the point in which the playback is resumed
   // you should _only_ be sending the asset_id of whatever you are resuming in: content or ad
@@ -411,7 +469,10 @@ NielsenDCR.prototype.videoPlaybackResumed = function(track) {
     if (type === 'ad') {
       this._client.ggPM('loadMetadata', this.getAdMetadata(track));
     } else if (type === 'content') {
-      this._client.ggPM('loadMetadata', this.getContentMetadata(track));
+      this._client.ggPM(
+        'loadMetadata',
+        this.getContentMetadata(track, 'video')
+      );
     }
   }
 
@@ -441,3 +502,35 @@ NielsenDCR.prototype.videoPlaybackCompleted = function(track) {
   this.currentAssetId = null;
   this.heartbeatId = null;
 };
+
+/**
+ * Formats airdate property per Nielsen DCR spec.
+ * Nielsen DCR requires dates to be in format YYYYMMDD HH:MI:SS
+ *
+ * @api private
+ */
+
+function formatAirdate(airdate) {
+  var date;
+  try {
+    date = dateformat(airdate, 'yyyymmdd hh:MM:ss', true);
+  } catch (e) {
+    // do nothing with this error for now
+  }
+
+  return date;
+}
+
+/**
+ * Falls back to check `properties.load_type` if
+ * `integrationsOpts.ad_load_type` is falsy
+ *
+ * @api private
+ */
+
+function formatLoadType(integrationOpts, loadTypeProperty) {
+  var loadType = find(integrationOpts, 'ad_load_type') || loadTypeProperty;
+  // or dynamic. linear means original ads that were broadcasted with tv airing. much less common use case
+  loadType = loadType === 'dynamic' ? '2' : '1';
+  return loadType;
+}

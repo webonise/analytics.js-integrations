@@ -26,7 +26,8 @@ describe('Amplitude', function() {
     mapQueryParams: {},
     traitsToIncrement: [],
     traitsToSetOnce: [],
-    preferAnonymousIdForDeviceId: true
+    preferAnonymousIdForDeviceId: true,
+    unsetParamsReferrerOnNewSession: false
   };
 
   beforeEach(function() {
@@ -64,6 +65,8 @@ describe('Amplitude', function() {
         .option('traitsToSetOnce', [])
         .option('traitsToIncrement', [])
         .option('deviceIdFromUrlParam', false)
+        .option('appendFieldsToEventProps', {})
+        .option('unsetParamsReferrerOnNewSession', false)
     );
   });
 
@@ -131,6 +134,10 @@ describe('Amplitude', function() {
         config.deviceIdFromUrlParam === options.deviceIdFromUrlParam
       );
       analytics.assert(config.deviceId === analytics.user().anonymousId());
+      analytics.assert(
+        config.unsetParamsReferrerOnNewSession ===
+          options.unsetParamsReferrerOnNewSession
+      );
     });
 
     it('should set api key', function() {
@@ -670,6 +677,18 @@ describe('Amplitude', function() {
         analytics.page();
         analytics.called(window.amplitude.getInstance().setDeviceId, 'example');
       });
+
+      it('should send an event with context properties mapped', function() {
+        amplitude.options.appendFieldsToEventProps = {
+          'context.page.path': 'pagePath'
+        };
+
+        analytics.track('event', { foo: 'bar' });
+        analytics.called(window.amplitude.getInstance().logEvent, 'event', {
+          foo: 'bar',
+          pagePath: '/context.html'
+        });
+      });
     });
 
     describe('#orderCompleted', function() {
@@ -709,6 +728,43 @@ describe('Amplitude', function() {
             }
           ]
         };
+      });
+
+      it('should send a custom revenueType if trackRevenuePerProduct is set', function() {
+        amplitude.options.useLogRevenueV2 = true;
+        amplitude.options.trackRevenuePerProduct = true;
+        var props = {
+          revenue: 20.0,
+          revenueType: 'I am custom',
+          products: [
+            {
+              quantity: 2,
+              price: 10.0,
+              productId: 'AMP1'
+            }
+          ]
+        };
+
+        var setRevenue = sinon.spy(amplitude, 'setRevenue');
+
+        analytics.track('Completed Order', props);
+
+        var expected = {
+          price: 10.0,
+          productId: 'AMP1',
+          revenueType: 'I am custom',
+          quantity: 2,
+          eventProps: {
+            revenue: 20.0,
+            revenueType: 'I am custom',
+            quantity: 2,
+            price: 10.0,
+            productId: 'AMP1'
+          },
+          revenue: 20.0
+        };
+
+        analytics.assert(setRevenue.withArgs(expected).calledOnce);
       });
 
       it('should send a logRevenueV2 event for all items in products array if trackRevenuePerProduct is true', function() {

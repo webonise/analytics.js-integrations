@@ -1,6 +1,14 @@
-# 3.0.1 / 2019-09-30
+# 3.2.1 / 2019-09-30
 
 - Added support for custom revenue type.
+
+# 3.2.0 / 2019-08-27
+
+- Add support for unsetParamsReferrerOnNewSession setting
+
+# 3.1.0 / 2019-08-09
+
+- Add mapping of non-property fields to event_props.
 
 # 3.0.0 / 2019-06-10
 

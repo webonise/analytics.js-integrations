@@ -49,6 +49,8 @@ var Amplitude = (module.exports = integration('Amplitude')
   .option('preferAnonymousIdForDeviceId', false)
   .option('traitsToSetOnce', [])
   .option('traitsToIncrement', [])
+  .option('appendFieldsToEventProps', {})
+  .option('unsetParamsReferrerOnNewSession', false)
   .tag('<script src="' + src + '">'));
 
 /**
@@ -78,6 +80,8 @@ Amplitude.prototype.initialize = function() {
     saveParamsReferrerOncePerSession: this.options
       .saveParamsReferrerOncePerSession,
     deviceIdFromUrlParam: this.options.deviceIdFromUrlParam,
+    unsetParamsReferrerOnNewSession: this.options
+      .unsetParamsReferrerOnNewSession,
     deviceId:
       this.options.preferAnonymousIdForDeviceId &&
       this.analytics &&
@@ -253,6 +257,11 @@ function logEvent(track, dontSetRevenue) {
       window.amplitude.getInstance().setUserProperties(params);
   }
 
+  // Append extra fields to event_props
+  each(function(prop, field) {
+    props[prop] = track.proxy(field);
+  }, this.options.appendFieldsToEventProps);
+
   // track the event
   if (options.groups) {
     window.amplitude
@@ -275,6 +284,8 @@ Amplitude.prototype.orderCompleted = function(track) {
   var products = track.products();
   var clonedTrack = track.json();
   var trackRevenuePerProduct = this.options.trackRevenuePerProduct;
+  var revenueType = track.proxy('properties.revenueType');
+  var revenue = track.revenue();
 
   // Amplitude does not allow arrays of objects to as properties of events.
   // Our Order Completed event however uses a products array for product level tracking.
@@ -300,8 +311,16 @@ Amplitude.prototype.orderCompleted = function(track) {
       // Price and quantity are both required by Amplitude:
       // https://amplitude.zendesk.com/hc/en-us/articles/115001361248#tracking-revenue
       // Price could potentially be 0 so handle that edge case.
-      if (trackRevenuePerProduct && price != null && quantity)
+      if (trackRevenuePerProduct && price != null && quantity) {
+        // Add revenueType if exists, to be able to override.
+        if (revenueType) {
+          clonedTrack.properties.revenueType = revenueType;
+        }
+        if (revenue) {
+          clonedTrack.properties.revenue = revenue;
+        }
         this.setRevenue(mapRevenueAttributes(new Track(clonedTrack)));
+      }
       logEvent.call(this, new Track(clonedTrack), trackRevenuePerProduct);
     }.bind(this),
     products
