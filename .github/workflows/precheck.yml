@@ -1,0 +1,17 @@
+name: Build Static app
+
+on:
+  push:
+    # Sequence of patterns matched against refs/heads
+    branches:
+      - SEG-18
+jobs:
+  build:
+    name: Builds the app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: nuxt/actions-yarn@master
+      - name: Install dependencies
+        run: |
+          yarn install
