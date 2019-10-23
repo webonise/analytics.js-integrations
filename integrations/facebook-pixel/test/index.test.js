@@ -2883,6 +2883,26 @@ describe('Facebook Pixel', function() {
 
       analytics.deepEqual(expected, actual);
     });
+
+    it('should send user traits if specified in snake case', function() {
+      analytics.identify('123', {
+        first_name: 'Vijayraj',
+        last_name: 'Nathe',
+        address: {
+          postal_code: 411041
+        }
+      });
+      var expected = {
+        fn: 'vijayraj',
+        ln: 'nathe',
+        ge: 'm',
+        db: '19910113',
+        zp: 411041
+      };
+      var actual = facebookPixel.formatTraits(analytics);
+
+      analytics.deepEqual(expected, actual);
+    });
   });
 
   describe('#merge', function() {
