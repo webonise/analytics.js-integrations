@@ -2886,15 +2886,36 @@ describe('Facebook Pixel', function() {
 
     it('should send user traits if specified in snake case', function() {
       analytics.identify('123', {
-        first_name: 'Vijayraj',
-        last_name: 'Nathe',
+        first_name: 'aarvi',
+        last_name: 'n',
         address: {
           postal_code: 411041
         }
       });
       var expected = {
-        fn: 'vijayraj',
-        ln: 'nathe',
+        fn: 'aarvi',
+        ln: 'n',
+        ge: 'm',
+        db: '19910113',
+        zp: 411041
+      };
+      var actual = facebookPixel.formatTraits(analytics);
+
+      analytics.deepEqual(expected, actual);
+    });
+
+    it('should prefer camelCase traits over snake_case traits', function() {
+      analytics.identify('123', {
+        firstName: 'aaru',
+        first_name: 'aarvi',
+        last_name: 'n',
+        address: {
+          postal_code: 411041
+        }
+      });
+      var expected = {
+        fn: 'aaru',
+        ln: 'n',
         ge: 'm',
         db: '19910113',
         zp: 411041
