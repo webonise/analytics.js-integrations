@@ -2886,15 +2886,15 @@ describe('Facebook Pixel', function() {
 
     it('should send user traits if specified in snake case', function() {
       analytics.identify('123', {
-        first_name: 'aarvi',
-        last_name: 'n',
+        first_name: 'john',
+        last_name: 'doe',
         address: {
           postal_code: 411041
         }
       });
       var expected = {
-        fn: 'aarvi',
-        ln: 'n',
+        fn: 'john',
+        ln: 'doe',
         ge: 'm',
         db: '19910113',
         zp: 411041
@@ -2906,16 +2906,16 @@ describe('Facebook Pixel', function() {
 
     it('should prefer camelCase traits over snake_case traits', function() {
       analytics.identify('123', {
-        firstName: 'aaru',
-        first_name: 'aarvi',
-        last_name: 'n',
+        firstName: 'joe',
+        first_name: 'john',
+        last_name: 'doe',
         address: {
           postal_code: 411041
         }
       });
       var expected = {
-        fn: 'aaru',
-        ln: 'n',
+        fn: 'joe',
+        ln: 'doe',
         ge: 'm',
         db: '19910113',
         zp: 411041
