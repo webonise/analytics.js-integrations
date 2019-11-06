@@ -12,20 +12,18 @@ var foldl = require('@ndhoule/foldl');
  */
 
 var Sentry = (module.exports = integration('Sentry')
-  .global('Raven')
-  .global('RavenConfig')
   .option('config', '')
   .option('serverName', null)
   .option('release', null)
   .option('ignoreErrors', [])
-  .option('ignoreUrls', [])
+  .option('blacklistUrls', [])
   .option('whitelistUrls', [])
   .option('includePaths', [])
   .option('maxMessageLength', null)
   .option('logger', null)
   .option('customVersionProperty', null)
   .tag(
-    '<script src="https://cdn.ravenjs.com/3.17.0/raven.min.js" crossorigin="anonymous">'
+    '<script src="https://browser.sentry-cdn.com/5.7.1/bundle.min.js" integrity="sha384-KMv6bBTABABhv0NI+rVWly6PIRvdippFEgjpKyxUcpEmDWZTkDOiueL5xW+cztZZ" crossorigin="anonymous"></script>'
   ));
 
 /**
@@ -47,17 +45,29 @@ Sentry.prototype.initialize = function() {
     serverName: this.options.serverName,
     whitelistUrls: this.options.whitelistUrls,
     ignoreErrors: this.options.ignoreErrors,
-    ignoreUrls: this.options.ignoreUrls,
+    blacklistUrls: this.options.ignoreUrls,
     includePaths: this.options.includePaths,
     maxMessageLength: this.options.maxMessageLength
   };
 
-  window.RavenConfig = {
-    dsn: dsnPublic,
-    config: reject(options)
-  };
-
-  this.load(this.ready);
+  // window.RavenConfig = {
+  //   dsn: dsnPublic,
+  //   config: reject(options)
+  // };
+  // window.Sentry.onLoad(function() {
+  //   var initiOptions = reject(options);
+  //   initiOptions.dsn = dsnPublic;
+  //   window.Sentry.init(initiOptions);
+  // });
+  var self = this;
+  this.load(function() {
+    self.ready();
+    window.Sentry.onLoad(function() {
+      var initiOptions = reject(options);
+      initiOptions.dsn = dsnPublic;
+      window.Sentry.init(initiOptions);
+    });
+  });
 };
 
 /**
@@ -68,7 +78,7 @@ Sentry.prototype.initialize = function() {
  */
 
 Sentry.prototype.loaded = function() {
-  return is.object(window.Raven);
+  return is.object(window.Sentry);
 };
 
 /**
@@ -79,7 +89,8 @@ Sentry.prototype.loaded = function() {
  */
 
 Sentry.prototype.identify = function(identify) {
-  window.Raven.setUserContext(identify.traits());
+  // window.Raven.setUserContext(identify.traits());
+  window.Sentry.setUser(identify.traits());
 };
 
 /**
