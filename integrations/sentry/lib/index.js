@@ -54,11 +54,6 @@ Sentry.prototype.initialize = function() {
   //   dsn: dsnPublic,
   //   config: reject(options)
   // };
-  // window.Sentry.onLoad(function() {
-  //   var initiOptions = reject(options);
-  //   initiOptions.dsn = dsnPublic;
-  //   window.Sentry.init(initiOptions);
-  // });
   var self = this;
   this.load(function() {
     self.ready();
@@ -91,6 +86,31 @@ Sentry.prototype.loaded = function() {
 Sentry.prototype.identify = function(identify) {
   // window.Raven.setUserContext(identify.traits());
   window.Sentry.setUser(identify.traits());
+};
+
+/**
+ * Set tag to events for easy categorization.
+ *
+ * @api public
+ * @param {Tag Key} tagKey
+ * @param {Tag Value} tagValue
+ */
+
+Sentry.prototype.setTag = function(tagKey, tagValue) {
+  window.Sentry.setTag(tagKey, tagValue);
+};
+
+/**
+ * Set Event severity level.
+ * One of: fatal, error, warning, info, debug
+ * @api public
+ * @param {Event Severity Level} level
+ */
+
+Sentry.prototype.setLevel = function(level) {
+  window.Sentry.configureScope(function(scope) {
+    scope.setLevel(level);
+  });
 };
 
 /**

@@ -156,6 +156,8 @@ describe('Sentry', function() {
     describe('#identify', function() {
       beforeEach(function() {
         analytics.stub(window.Sentry, 'setUser');
+        analytics.stub(window.Sentry, 'captureException');
+        analytics.stub(window.Sentry, 'setTag');
       });
 
       it('should send an id', function() {
@@ -174,6 +176,21 @@ describe('Sentry', function() {
           id: 'id',
           trait: true
         });
+      });
+
+      it('should capture error event', function() {
+        try {
+          // eslint-disable-next-line no-undef
+          aFunctionThatMightFail();
+        } catch (err) {
+          window.Sentry.captureException(err);
+        }
+        analytics.called(window.Sentry.captureException);
+      });
+
+      xit('should set tag for event', function() {
+        analytics.setTag('page_locale', 'de-at');
+        analytics.called(window.Sentry.setTag, 'page_locale', 'de-at');
       });
     });
   });
