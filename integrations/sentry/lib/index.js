@@ -20,6 +20,8 @@ var Sentry = (module.exports = integration('Sentry')
   .option('whitelistUrls', [])
   .option('logger', null)
   .option('customVersionProperty', null)
+  .option('tagSetting', null)
+  .option('eventSeverity', null)
   .tag(
     '<script src="https://browser.sentry-cdn.com/5.7.1/bundle.min.js" integrity="sha384-KMv6bBTABABhv0NI+rVWly6PIRvdippFEgjpKyxUcpEmDWZTkDOiueL5xW+cztZZ" crossorigin="anonymous"></script>'
   ));
@@ -59,6 +61,15 @@ Sentry.prototype.initialize = function() {
       initiOptions.dsn = dsnPublic;
       window.Sentry.init(initiOptions);
     });
+    var tagSetting = self.options.tagSetting;
+    var level = self.options.eventSeverity;
+
+    if (tagSetting) {
+      self.setTag(tagSetting.key, tagSetting.value);
+    }
+    if (level) {
+      self.setLevel(level);
+    }
   });
 };
 
