@@ -18,7 +18,7 @@ describe('Sentry', function() {
     ignoreErrors: ['fb_xd_fragment'],
     ignoreUrls: ['/graph.facebook.com/', 'http://example.com/script2.js'],
     // includePaths: ['/https?://getsentry.com/', '/https?://cdn.getsentry.com/'],
-    maxMessageLength: 50,
+    // maxMessageLength: 50,
     customVersionProperty: null
   };
 
@@ -47,7 +47,6 @@ describe('Sentry', function() {
         .option('ignoreErrors', [])
         .option('ignoreUrls', [])
         .option('whitelistUrls', [])
-        .option('maxMessageLength', null)
         .option('logger', null)
         .option('customVersionProperty', null)
     );
@@ -73,8 +72,7 @@ describe('Sentry', function() {
           serverName: options.serverName,
           whitelistUrls: options.whitelistUrls,
           ignoreErrors: options.ignoreErrors,
-          ignoreUrls: options.ignoreUrls,
-          maxMessageLength: options.maxMessageLength
+          ignoreUrls: options.ignoreUrls
         };
         analytics.initialize();
         analytics.assert(window.Sentry.dsn === options.config);
@@ -88,7 +86,6 @@ describe('Sentry', function() {
           whitelistUrls: options.whitelistUrls,
           ignoreErrors: options.ignoreErrors,
           ignoreUrls: options.ignoreUrls,
-          maxMessageLength: options.maxMessageLength,
           release: '2.4.0'
         };
 

@@ -18,7 +18,6 @@ var Sentry = (module.exports = integration('Sentry')
   .option('ignoreErrors', [])
   .option('ignoreUrls', [])
   .option('whitelistUrls', [])
-  .option('maxMessageLength', null)
   .option('logger', null)
   .option('customVersionProperty', null)
   .tag(
@@ -44,9 +43,8 @@ Sentry.prototype.initialize = function() {
     serverName: this.options.serverName,
     whitelistUrls: this.options.whitelistUrls,
     ignoreErrors: this.options.ignoreErrors,
-    blacklistUrls: this.options.ignoreUrls,
+    blacklistUrls: this.options.ignoreUrls
     // includePaths: this.options.includePaths,
-    maxMessageLength: this.options.maxMessageLength
   };
 
   // window.RavenConfig = {
