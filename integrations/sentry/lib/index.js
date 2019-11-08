@@ -16,9 +16,8 @@ var Sentry = (module.exports = integration('Sentry')
   .option('serverName', null)
   .option('release', null)
   .option('ignoreErrors', [])
-  .option('blacklistUrls', [])
+  .option('ignoreUrls', [])
   .option('whitelistUrls', [])
-  .option('includePaths', [])
   .option('maxMessageLength', null)
   .option('logger', null)
   .option('customVersionProperty', null)
@@ -40,13 +39,13 @@ Sentry.prototype.initialize = function() {
     ? window[this.options.customVersionProperty]
     : null;
   var options = {
-    logger: this.options.logger,
+    environment: this.options.logger,
     release: customRelease || this.options.release,
     serverName: this.options.serverName,
     whitelistUrls: this.options.whitelistUrls,
     ignoreErrors: this.options.ignoreErrors,
     blacklistUrls: this.options.ignoreUrls,
-    includePaths: this.options.includePaths,
+    // includePaths: this.options.includePaths,
     maxMessageLength: this.options.maxMessageLength
   };
 

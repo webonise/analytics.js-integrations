@@ -16,8 +16,8 @@ describe('Sentry', function() {
     serverName: 'B5372DB0-C21E-11E4-8DFC-AA07A5B093DB',
     whitelistUrls: ['/getsentry.com/', 'segment.com'],
     ignoreErrors: ['fb_xd_fragment'],
-    blacklistUrls: ['/graph.facebook.com/', 'http://example.com/script2.js'],
-    includePaths: ['/https?://getsentry.com/', '/https?://cdn.getsentry.com/'],
+    ignoreUrls: ['/graph.facebook.com/', 'http://example.com/script2.js'],
+    // includePaths: ['/https?://getsentry.com/', '/https?://cdn.getsentry.com/'],
     maxMessageLength: 50,
     customVersionProperty: null
   };
@@ -45,9 +45,8 @@ describe('Sentry', function() {
         .option('serverName', null)
         .option('release', null)
         .option('ignoreErrors', [])
-        .option('blacklistUrls', [])
+        .option('ignoreUrls', [])
         .option('whitelistUrls', [])
-        .option('includePaths', [])
         .option('maxMessageLength', null)
         .option('logger', null)
         .option('customVersionProperty', null)
@@ -74,8 +73,7 @@ describe('Sentry', function() {
           serverName: options.serverName,
           whitelistUrls: options.whitelistUrls,
           ignoreErrors: options.ignoreErrors,
-          blacklistUrls: options.blacklistUrls,
-          includePaths: options.includePaths,
+          ignoreUrls: options.ignoreUrls,
           maxMessageLength: options.maxMessageLength
         };
         analytics.initialize();
@@ -89,8 +87,7 @@ describe('Sentry', function() {
           serverName: options.serverName,
           whitelistUrls: options.whitelistUrls,
           ignoreErrors: options.ignoreErrors,
-          blacklistUrls: options.blacklistUrls,
-          includePaths: options.includePaths,
+          ignoreUrls: options.ignoreUrls,
           maxMessageLength: options.maxMessageLength,
           release: '2.4.0'
         };
@@ -119,23 +116,21 @@ describe('Sentry', function() {
       });
 
       xit('should reject empty array settings', function() {
-        sentry.options.blacklistUrls = [];
+        sentry.options.ignoreUrls = [];
         analytics.initialize();
-        analytics.assert(!window.RavenConfig.config.blacklistUrls);
+        analytics.assert(!window.RavenConfig.config.ignoreUrls);
       });
 
       xit('should reject arrays that have empty strings', function() {
-        sentry.options.blacklistUrls = [''];
+        sentry.options.ignoreUrls = [''];
         analytics.initialize();
-        analytics.assert(!window.RavenConfig.config.blacklistUrls);
+        analytics.assert(!window.RavenConfig.config.ignoreUrls);
       });
 
       xit('should clean arrays', function() {
-        sentry.options.blacklistUrls = ['', 'foo'];
-        sentry.options.includePaths = ['', ''];
+        sentry.options.ignoreUrls = ['', 'foo'];
         analytics.initialize();
-        analytics.assert(window.RavenConfig.config.blacklistUrls[0] === 'foo');
-        analytics.assert(!window.RavenConfig.config.includePaths);
+        analytics.assert(window.RavenConfig.config.ignoreUrls[0] === 'foo');
       });
     });
   });
