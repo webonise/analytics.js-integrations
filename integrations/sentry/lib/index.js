@@ -29,8 +29,7 @@ var Sentry = (module.exports = integration('Sentry')
 /**
  * Initialize.
  *
- * https://docs.sentry.io/clients/javascript/config/
- * https://github.com/getsentry/raven-js/blob/3.12.1/src/raven.js#L646-L649
+ * https://docs.sentry.io/error-reporting/quickstart/?platform=browser
  * @api public
  */
 
@@ -46,13 +45,8 @@ Sentry.prototype.initialize = function() {
     whitelistUrls: this.options.whitelistUrls,
     ignoreErrors: this.options.ignoreErrors,
     blacklistUrls: this.options.ignoreUrls
-    // includePaths: this.options.includePaths,
   };
 
-  // window.RavenConfig = {
-  //   dsn: dsnPublic,
-  //   config: reject(options)
-  // };
   var self = this;
   this.load(function() {
     self.ready();
@@ -92,7 +86,6 @@ Sentry.prototype.loaded = function() {
  */
 
 Sentry.prototype.identify = function(identify) {
-  // window.Raven.setUserContext(identify.traits());
   window.Sentry.setUser(identify.traits());
 };
 
