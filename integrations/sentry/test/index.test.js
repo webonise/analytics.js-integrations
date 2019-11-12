@@ -63,72 +63,6 @@ describe('Sentry', function() {
         analytics.page();
         analytics.called(sentry.load);
       });
-
-      xit('should respect UI settings', function() {
-        // https://github.com/getsentry/raven-js/blob/3.0.2/src/raven.js#L135-L138
-        var config = {
-          logger: options.logger,
-          release: options.release,
-          serverName: options.serverName,
-          whitelistUrls: options.whitelistUrls,
-          ignoreErrors: options.ignoreErrors,
-          ignoreUrls: options.ignoreUrls
-        };
-        analytics.initialize();
-        analytics.assert(window.Sentry.dsn === options.config);
-        analytics.assert.deepEqual(window.RavenConfig.config, config);
-      });
-
-      xit('should allow and set custom versions', function() {
-        var config = {
-          logger: options.logger,
-          serverName: options.serverName,
-          whitelistUrls: options.whitelistUrls,
-          ignoreErrors: options.ignoreErrors,
-          ignoreUrls: options.ignoreUrls,
-          release: '2.4.0'
-        };
-
-        sentry.options.customVersionProperty = 'my_custom_version_property';
-        window.my_custom_version_property = '2.4.0';
-        analytics.initialize();
-
-        // Need to delete before asserts to prevent leaking effects in case of failure.
-        delete window.my_custom_version_property;
-
-        analytics.assert(window.RavenConfig.dsn === options.config);
-        analytics.assert.deepEqual(window.RavenConfig.config, config);
-      });
-
-      xit('should reject null settings', function() {
-        sentry.options.release = null;
-        analytics.initialize();
-        analytics.assert(!window.RavenConfig.config.release);
-      });
-
-      xit('should reject empty strings', function() {
-        sentry.options.release = '';
-        analytics.initialize();
-        analytics.assert(!window.Sentry.config.release);
-      });
-
-      xit('should reject empty array settings', function() {
-        sentry.options.ignoreUrls = [];
-        analytics.initialize();
-        analytics.assert(!window.RavenConfig.config.ignoreUrls);
-      });
-
-      xit('should reject arrays that have empty strings', function() {
-        sentry.options.ignoreUrls = [''];
-        analytics.initialize();
-        analytics.assert(!window.RavenConfig.config.ignoreUrls);
-      });
-
-      xit('should clean arrays', function() {
-        sentry.options.ignoreUrls = ['', 'foo'];
-        analytics.initialize();
-        analytics.assert(window.RavenConfig.config.ignoreUrls[0] === 'foo');
-      });
     });
   });
 
@@ -178,11 +112,6 @@ describe('Sentry', function() {
           window.Sentry.captureException(err);
         }
         analytics.called(window.Sentry.captureException);
-      });
-
-      xit('should set tag for event', function() {
-        analytics.setTag('page_locale', 'de-at');
-        analytics.called(window.Sentry.setTag, 'page_locale', 'de-at');
       });
     });
   });
