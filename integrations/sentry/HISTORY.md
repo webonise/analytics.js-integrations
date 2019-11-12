@@ -1,3 +1,7 @@
+3.0.0 / 2019-11-12
+
+* Updated the sentry sdk to 5.7.1
+
 2.6.2 / 2017-07-20
 
 * Bumping version again to trigger build

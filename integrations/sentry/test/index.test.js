@@ -19,6 +19,8 @@ describe('Sentry', function() {
     ignoreUrls: ['/graph.facebook.com/', 'http://example.com/script2.js'],
     // includePaths: ['/https?://getsentry.com/', '/https?://cdn.getsentry.com/'],
     // maxMessageLength: 50,
+    tagSetting: null,
+    eventSeverity: 'error',
     customVersionProperty: null
   };
 
@@ -49,6 +51,8 @@ describe('Sentry', function() {
         .option('whitelistUrls', [])
         .option('logger', null)
         .option('customVersionProperty', null)
+        .option('tagSetting', null)
+        .option('eventSeverity', null)
     );
   });
 
