@@ -1,3 +1,8 @@
+2.18.1 / 2019-12-23
+===================
+
+  * Added some more handling around resetting custom dimension.
+
 2.18.0 / 2019-12-17
 ===================
 

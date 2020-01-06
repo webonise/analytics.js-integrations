@@ -241,7 +241,12 @@ GA.prototype.page = function(page) {
       resetCustomDimensions[opts.dimensions[property]] = null;
     }
   }
-  window.ga(self._trackerName + 'set', resetCustomDimensions);
+  if (
+    opts.resetCustomDimensionsOnPage.length &&
+    Object.keys(resetCustomDimensions).length
+  ) {
+    window.ga(self._trackerName + 'set', resetCustomDimensions);
+  }
 
   pageview = extend(
     pageview,
@@ -249,6 +254,7 @@ GA.prototype.page = function(page) {
   );
 
   if (pageReferrer !== document.referrer) payload.referrer = pageReferrer; // allow referrer override if referrer was manually set
+
   window.ga(this._trackerName + 'set', payload);
 
   if (this.pageCalled) delete pageview.location;

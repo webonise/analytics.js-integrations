@@ -416,6 +416,19 @@ describe('Google Analytics', function() {
           });
         });
 
+        it('should set page properties with path', function() {
+          ga.options.trackNamedPages = true;
+          analytics.page('Apply Form', {
+            title: 'GrowthLine Application Form',
+            url: 'https://apply.growthstreet.co.uk/apply',
+            path: '/apply'
+          });
+          analytics.called(window.ga, 'set', {
+            page: '/apply',
+            title: 'Apply Form'
+          });
+        });
+
         it('should not set custom dimensions/metrics if settings.setAllMappedProps is false', function() {
           ga.options.setAllMappedProps = false;
           ga.options.metrics = {
@@ -606,13 +619,11 @@ describe('Google Analytics', function() {
           analytics.page('Name');
           analytics.page('Category', 'Name');
           // send should only be sent twice, for pageviews, not events
-          analytics.assert(window.ga.args.length === 6);
+          analytics.assert(window.ga.args.length === 4);
           analytics.assert(window.ga.args[0][0] === 'set');
-          analytics.assert(window.ga.args[1][0] === 'set');
-          analytics.assert(window.ga.args[2][0] === 'send');
-          analytics.assert(window.ga.args[3][0] === 'set');
-          analytics.assert(window.ga.args[4][0] === 'set');
-          analytics.assert(window.ga.args[5][0] === 'send');
+          analytics.assert(window.ga.args[1][0] === 'send');
+          analytics.assert(window.ga.args[2][0] === 'set');
+          analytics.assert(window.ga.args[3][0] === 'send');
         });
 
         it('should reset custom dimensions before set', function() {
