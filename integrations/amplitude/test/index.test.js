@@ -216,6 +216,25 @@ describe('Amplitude', function() {
         analytics.stub(window.amplitude.getInstance(), 'logEvent');
         analytics.stub(window.amplitude.getInstance(), 'setUserProperties');
         analytics.stub(window.amplitude.getInstance(), 'setDeviceId');
+        analytics.stub(window.amplitude.getInstance(), 'setVersionName');
+      });
+
+      it('should set app version if specified in context', function() {
+        analytics.page(
+          'page',
+          {},
+          {
+            context: {
+              app: {
+                version: '1.2.3'
+              }
+            }
+          }
+        );
+        analytics.called(
+          window.amplitude.getInstance().setVersionName,
+          '1.2.3'
+        );
       });
 
       it('should not track unnamed pages by default', function() {
@@ -350,6 +369,7 @@ describe('Amplitude', function() {
         analytics.stub(window.amplitude.getInstance(), 'setUserProperties');
         analytics.stub(window.amplitude.getInstance(), 'setGroup');
         analytics.stub(window.amplitude.getInstance(), 'setDeviceId');
+        analytics.stub(window.amplitude.getInstance(), 'setVersionName');
       });
 
       it('should send an id', function() {
@@ -475,6 +495,24 @@ describe('Amplitude', function() {
         analytics.identify('id');
         analytics.called(window.amplitude.getInstance().setDeviceId, 'example');
       });
+
+      it('should set app version if specified in context', function() {
+        analytics.identify(
+          'id',
+          {},
+          {
+            context: {
+              app: {
+                version: '1.2.3'
+              }
+            }
+          }
+        );
+        analytics.called(
+          window.amplitude.getInstance().setVersionName,
+          '1.2.3'
+        );
+      });
     });
 
     describe('#track', function() {
@@ -485,6 +523,25 @@ describe('Amplitude', function() {
         analytics.stub(window.amplitude.getInstance(), 'logRevenueV2');
         analytics.stub(window.amplitude.getInstance(), 'logEventWithGroups');
         analytics.stub(window.amplitude.getInstance(), 'setDeviceId');
+        analytics.stub(window.amplitude.getInstance(), 'setVersionName');
+      });
+
+      it('should set app version if specified in context', function() {
+        analytics.track(
+          'event',
+          {},
+          {
+            context: {
+              app: {
+                version: '1.2.3'
+              }
+            }
+          }
+        );
+        analytics.called(
+          window.amplitude.getInstance().setVersionName,
+          '1.2.3'
+        );
       });
 
       it('should send an event', function() {
