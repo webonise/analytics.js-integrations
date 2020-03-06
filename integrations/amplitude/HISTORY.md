@@ -1,3 +1,7 @@
+# 3.3.1 / 2020-03-06
+
+- Add support for specifying app version from context setting for identify, page and track events.
+
 # 3.3.0 / 2019-10-09
 
 - Add support for versionName setting, this will allow user to specify version.

@@ -174,6 +174,11 @@ Amplitude.prototype.page = function(page) {
  */
 
 Amplitude.prototype.identify = function(identify) {
+  var appVersion = identify.proxy('context.app.version');
+  if (appVersion) {
+    window.amplitude.getInstance().setVersionName(appVersion);
+  }
+
   this.setDeviceIdFromAnonymousId(identify);
 
   var id = identify.userId();
@@ -239,6 +244,11 @@ Amplitude.prototype.setTraits = function(traits) {
 Amplitude.prototype.track = logEvent;
 
 function logEvent(track, dontSetRevenue) {
+  var appVersion = track.proxy('context.app.version');
+  if (appVersion) {
+    window.amplitude.getInstance().setVersionName(appVersion);
+  }
+
   this.setDeviceIdFromAnonymousId(track);
 
   var props = track.properties();
