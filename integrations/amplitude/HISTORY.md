@@ -1,3 +1,7 @@
+# 3.4.0 / 2020-03-17
+
+- Update Amplitude SDK to v5.10.0
+
 # 3.3.0 / 2019-10-09
 
 - Add support for versionName setting, this will allow user to specify version.
