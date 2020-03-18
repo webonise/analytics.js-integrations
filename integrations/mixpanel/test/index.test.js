@@ -19,7 +19,8 @@ describe('Mixpanel', function() {
     trackCategorizedPages: true,
     trackNamedPages: true,
     groupIdentifierTraits: [],
-    enableEuropeanUnionEndpoint: false
+    enableEuropeanUnionEndpoint: false,
+    cookieDomain: ''
   };
 
   beforeEach(function() {
@@ -58,6 +59,7 @@ describe('Mixpanel', function() {
         .option('groupIdentifierTraits', [])
         .option('sourceName', '')
         .option('enableEuropeanUnionEndpoint', false)
+        .option('cookieDomain', '')
     );
   });
 
@@ -97,6 +99,7 @@ describe('Mixpanel', function() {
 
   describe('after loading', function() {
     beforeEach(function(done) {
+      mixpanel.options.cookieDomain = 'abc.com';
       analytics.once('ready', done);
       analytics.initialize();
       analytics.page();
@@ -111,6 +114,12 @@ describe('Mixpanel', function() {
             .toString()
             .includes("{ mp_lib: 'Segment: web' }")
         );
+      });
+
+      it('should set cookie domain', function() {
+        analytics.initialize();
+        analytics.page();
+        analytics.deepEqual(window.mixpanel.config.cookie_domain, 'abc.com');
       });
     });
 

@@ -40,6 +40,7 @@ var Mixpanel = (module.exports = integration('Mixpanel')
   .option('groupIdentifierTraits', [])
   .option('sourceName', '')
   .option('enableEuropeanUnionEndpoint', false)
+  .option('cookieDomain', '')
   .tag('<script src="//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js">'));
 
 /**
@@ -78,6 +79,10 @@ for(h=0;h<k.length;h++)e(d,k[h]);a._i.push([b,c,f])};a.__SV=1.2;}})(document,win
   options.loaded = function(mixpanel) {
     mixpanel.register({ mp_lib: 'Segment: web' });
   };
+  if (this.options.cookieDomain && this.options.cookieDomain.trim()) {
+    // Custom cookie domain (overrides value specified in this Mixpanel instance's config)
+    options.cookie_domain = this.options.cookieDomain.trim();
+  }
   window.mixpanel.init(options.token, options);
   this.load(this.ready);
 };

@@ -1,3 +1,7 @@
+3.2.1 / 2020-03-18
+==================
+  * Added new setting for setting cookie domain while initializing.
+
 3.1.0 / 2019-09-27
 ==================
   * Added support for groups.
