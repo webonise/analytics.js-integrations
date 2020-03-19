@@ -146,7 +146,7 @@ describe('Visual Website Optimizer', function() {
             context: {
               integration: {
                 name: 'visual-website-optimizer',
-                version: '1.0.0'
+                version: '1.7.4'
               }
             }
           }
@@ -176,7 +176,7 @@ describe('Visual Website Optimizer', function() {
             context: {
               integration: {
                 name: 'visual-website-optimizer',
-                version: '1.0.0'
+                version: '1.7.4'
               }
             }
           }
@@ -206,7 +206,7 @@ describe('Visual Website Optimizer', function() {
             context: {
               integration: {
                 name: 'visual-website-optimizer',
-                version: '1.0.0'
+                version: '1.7.4'
               }
             }
           }
@@ -236,7 +236,7 @@ describe('Visual Website Optimizer', function() {
             context: {
               integration: {
                 name: 'visual-website-optimizer',
-                version: '1.0.0'
+                version: '1.7.4'
               }
             }
           }
@@ -265,7 +265,7 @@ describe('Visual Website Optimizer', function() {
             context: {
               integration: {
                 name: 'visual-website-optimizer',
-                version: '1.0.0'
+                version: '1.7.4'
               }
             }
           }

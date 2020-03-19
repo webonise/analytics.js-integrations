@@ -36,7 +36,7 @@ var VWO = (module.exports = integration('Visual Website Optimizer')
 
 var integrationContext = {
   name: 'visual-website-optimizer',
-  version: '1.0.0'
+  version: '1.7.4'
 };
 
 /**
