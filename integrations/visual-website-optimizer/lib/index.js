@@ -87,7 +87,7 @@ VWO.prototype.initialize = function() {
 VWO.prototype.orderCompleted = function(track) {
   var total = track.total() || track.revenue() || 0;
   enqueue(function() {
-    window._vis_opt_revenue_conversion(total);
+    window._vis_opt_revenue_conversion(['track.revenueConversion', total]);
   });
 };
 

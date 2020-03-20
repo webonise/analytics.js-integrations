@@ -311,7 +311,11 @@ describe('Visual Website Optimizer', function() {
 
         window._vis_opt_queue.push.args[0][0]();
         analytics.assert.equal(
-          window._vis_opt_revenue_conversion.args[0][0],
+          window._vis_opt_revenue_conversion.args[0][0][0],
+          'track.revenueConversion'
+        );
+        analytics.assert.equal(
+          window._vis_opt_revenue_conversion.args[0][0][1],
           166
         );
       });
