@@ -87,6 +87,7 @@ VWO.prototype.initialize = function() {
 VWO.prototype.orderCompleted = function(track) {
   var total = track.total() || track.revenue() || 0;
   enqueue(function() {
+    // REF: https://help.vwo.com/hc/en-us/articles/360019494014
     window._vis_opt_revenue_conversion(['track.revenueConversion', total]);
   });
 };
