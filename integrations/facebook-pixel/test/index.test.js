@@ -352,6 +352,86 @@ describe('Facebook Pixel', function() {
           assertEventId(window.fbq);
         });
 
+        it('should hash and send blacklisted nested properties if the hashProperty flag is true', function() {
+          facebookPixel.options.blacklistPiiProperties = [
+            {
+              propertyName: 'email',
+              hashProperty: true
+            },
+            {
+              propertyName: 'team.name',
+              hashProperty: true
+            }
+          ];
+          analytics.track('event', {
+            // PII
+            email: 'steph@warriors.com',
+            firstName: 'Steph',
+            lastName: 'Curry',
+
+            // Non PII
+            position: 'point guard',
+
+            // Not default PII but included in blacklist setting
+            team: { name: 'Warriors', id: 101 }
+          });
+
+          analytics.called(
+            window.fbq,
+            'trackSingleCustom',
+            options.pixelId,
+            'event',
+            {
+              team: {
+                name:
+                  '3fae3f8daeddc90e04e7502be791c0d149cbc8f0886d68037ad81b8bd61d029d'
+              },
+              email:
+                '6dd27a21704a843224245b20369e216eecd3a599b78c4489e5f6cabb5aeca24a',
+              position: 'point guard'
+            }
+          );
+          assertEventId(window.fbq);
+        });
+
+        it('should not hash and send blacklisted nested properties if the hashProperty flag is false', function() {
+          facebookPixel.options.blacklistPiiProperties = [
+            {
+              propertyName: 'email',
+              hashProperty: true
+            },
+            {
+              propertyName: 'team.name',
+              hashProperty: false
+            }
+          ];
+          analytics.track('event', {
+            // PII
+            email: 'steph@warriors.com',
+            firstName: 'Steph',
+            lastName: 'Curry',
+
+            // Non PII
+            position: 'point guard',
+
+            // Not default PII but included in blacklist setting
+            team: { name: 'Warriors', id: 101 }
+          });
+
+          analytics.called(
+            window.fbq,
+            'trackSingleCustom',
+            options.pixelId,
+            'event',
+            {
+              email:
+                '6dd27a21704a843224245b20369e216eecd3a599b78c4489e5f6cabb5aeca24a',
+              position: 'point guard'
+            }
+          );
+          assertEventId(window.fbq);
+        });
+
         it('should only attempt to hash string values', function() {
           facebookPixel.options.blacklistPiiProperties = [
             {

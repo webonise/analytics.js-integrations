@@ -1,3 +1,8 @@
+2.11.0/ 2020-03-24
+==================
+
+  * Add support for nested property blacklisting for fb pixel.
+
 2.10.0/ 2019-12-04
 ==================
 
