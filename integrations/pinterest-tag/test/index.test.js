@@ -92,5 +92,28 @@ describe('Pinterest', function() {
         });
       });
     });
+
+    describe('#track', function() {
+      beforeEach(function() {
+        analytics.stub(window, 'pintrk');
+      });
+
+      it('should track product viewed as page viewed', function() {
+        analytics.track('Product Viewed', {
+          id: '507f1f77bcf86cd799439011',
+          name: 'Monopoly: 3rd Edition',
+          price: 18.99
+        });
+
+        analytics.called(window.pintrk, 'track', 'PageVisit', {
+          line_items: [
+            {
+              product_name: 'Monopoly: 3rd Edition',
+              product_price: 18.99
+            }
+          ]
+        });
+      });
+    });
   });
 });
