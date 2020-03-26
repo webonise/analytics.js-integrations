@@ -115,5 +115,28 @@ describe('Pinterest', function() {
         });
       });
     });
+
+    describe('#page', function() {
+      beforeEach(function() {
+        analytics.stub(window, 'pintrk');
+      });
+
+      it('should track pagevisit for named page view', function() {
+        analytics.page('Page1');
+
+        analytics.called(window.pintrk, 'track', 'PageVisit', {
+          name: 'Page1'
+        });
+      });
+
+      it('should track viewcategory for categorised page view', function() {
+        analytics.page('Page1', 'Category');
+
+        analytics.called(window.pintrk, 'track', 'ViewCategory', {
+          category: 'Page1',
+          name: 'Category'
+        });
+      });
+    });
   });
 });
