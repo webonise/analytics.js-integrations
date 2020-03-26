@@ -1,7 +1,12 @@
+1.2.3 / 2020-03-26
+==================
+
+  * Added support for product viewed event as PageVisit.
+
 1.2.2 / 2019-10-14
 ==================
 
-  * Add support for enhanced match. 
+  * Add support for enhanced match.
 
 1.2.1 / 2019-07-02
 ==================
