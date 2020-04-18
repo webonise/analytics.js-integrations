@@ -661,12 +661,21 @@ FacebookPixel.prototype.buildPayload = function(track, isStandardEvent) {
 
   // Transforming the setting in a map for easier lookups.
   var customPiiProperties = {};
+  var customPiiNestedProperties = {};
   for (var i = 0; i < blacklistPiiProperties.length; i++) {
     var configuration = blacklistPiiProperties[i];
-    customPiiProperties[configuration.propertyName] =
-      configuration.hashProperty;
+    var propertyName = configuration.propertyName;
+    var hashProperty = configuration.hashProperty;
+    propertyName = propertyName.split('.');
+    if (propertyName.length > 1) {
+      customPiiNestedProperties[propertyName[0]] = {
+        path: configuration.propertyName,
+        hashProperty: hashProperty
+      };
+    } else {
+      customPiiProperties[propertyName[0]] = hashProperty;
+    }
   }
-
   var payload = {};
   var properties = track.properties();
 
@@ -703,6 +712,22 @@ FacebookPixel.prototype.buildPayload = function(track, isStandardEvent) {
       continue;
     }
 
+    // Custom PII nested properties
+    if (customPiiNestedProperties.hasOwnProperty(property)) {
+      var customPiiProperty = customPiiNestedProperties[property];
+      var hash = customPiiProperty.hashProperty;
+      if (hash && typeof value === 'object') {
+        var propertyPath = customPiiProperty.path;
+        var valueObj = {};
+        valueObj[property] = value;
+        var nestedValue = getPropertyByString(valueObj, propertyPath);
+        if (typeof nestedValue === 'string') {
+          setPropertyByString(payload, propertyPath, sha256(nestedValue));
+        }
+      }
+      continue;
+    }
+
     // Default PII properties
     var isPropertyPii = defaultPiiProperties.indexOf(property) >= 0;
     var isPropertyWhitelisted = whitelistPiiProperties.indexOf(property) >= 0;
@@ -713,6 +738,56 @@ FacebookPixel.prototype.buildPayload = function(track, isStandardEvent) {
 
   return payload;
 };
+
+/**
+ * return the property of object by string path
+ * @param {Object} obj
+ * @param {String} str
+ * @returns {any}
+ * */
+
+function getPropertyByString(obj, str) {
+  try {
+    var sourceObj = obj;
+    var props = str.split('.');
+    for (var i = 0, n = props.length; i < n; i++) {
+      var key = props[i];
+      if (key in sourceObj) {
+        sourceObj = sourceObj[key];
+      } else {
+        return null;
+      }
+    }
+    return sourceObj;
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * set the property of object by string path
+ * @param {Object} obj
+ * @param {String} propertyPath
+ * @param {String} value
+ * @returns {any}
+ * */
+function setPropertyByString(obj, propertyPath, value) {
+  /* eslint-disable no-param-reassign */
+  var properties = Array.isArray(propertyPath)
+    ? propertyPath
+    : propertyPath.split('.');
+  if (properties.length > 1) {
+    if (
+      !obj.hasOwnProperty(properties[0]) ||
+      typeof obj[properties[0]] !== 'object'
+    ) {
+      obj[properties[0]] = {};
+    }
+    return setPropertyByString(obj[properties[0]], properties.slice(1), value);
+  }
+  obj[properties[0]] = value;
+  return true;
+}
 
 /**
  * Merge two javascript objects. This works similarly to `Object.assign({}, obj1, obj2)`
