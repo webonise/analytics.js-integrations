@@ -1,3 +1,9 @@
+2.5.0 / 2020-03-20
+==================
+
+  * Update VWO to version (1.7.4).
+  * Add support for VWO Conversion Tracking.
+
 2.4.1 / 2019-12-04
 ==================
 

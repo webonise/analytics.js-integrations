@@ -36,7 +36,7 @@ var VWO = (module.exports = integration('Visual Website Optimizer')
 
 var integrationContext = {
   name: 'visual-website-optimizer',
-  version: '1.0.0'
+  version: '1.7.4'
 };
 
 /**
@@ -87,7 +87,8 @@ VWO.prototype.initialize = function() {
 VWO.prototype.orderCompleted = function(track) {
   var total = track.total() || track.revenue() || 0;
   enqueue(function() {
-    window._vis_opt_revenue_conversion(total);
+    // REF: https://help.vwo.com/hc/en-us/articles/360019494014
+    window._vis_opt_revenue_conversion(['track.revenueConversion', total]);
   });
 };
 
